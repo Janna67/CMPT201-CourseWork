@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static char *make_message(const char *name) {
+    size_t n = strlen("Hello, ") + strlen(name);
+    char *msg = malloc(n+1);
+    if (!msg) return NULL;
+
+    strcpy(msg, "Hello, ");
+    strcat(msg, name);
+    return msg;
+}
+
+int main(void) {
+    const char *who = "CMPT201";
+    char *msg = make_message(who);
+    if (!msg) {
+        fprintf(stderr, "malloc failed\n");
+        return 1;
+    }
+
+    printf("%s\n", msg);
+    free(msg);
+    return 0;
+}
