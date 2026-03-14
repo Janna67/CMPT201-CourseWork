@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define HISTORY_SIZE 5
+
+void free_history(char *history[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (history[i] != NULL) {
+            free(history[i]);
+            history[i] = NULL;
+        }
+    }
+}
+
+int main(void) {
+    char *history[HISTORY_SIZE] = {NULL};
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    int count = 0;
+
+    while (1) {
+        printf("Enter input: ");
+        fflush(stdout);
+
+        read = getline(&line, &len, stdin);
+        if (read == -1) {
+            // Ctrl+D or error
+            break;
+        }
+
+        // Remove trailing newline if exists
+        if (read > 0 && line[read - 1] == '\n') {
+            line[read - 1] = '\0';
+        }
+
+        // Store the line into history (circular buffer)
+        int idx = count % HISTORY_SIZE;
+
+        if (history[idx] != NULL) {
+            free(history[idx]);
+        }
+
+        history[idx] = strdup(line);
+        if (history[idx] == NULL) {
+            perror("strdup");
+            break;
+        }
+
+        count++;
+
+        // If command is "print", print last 5 lines
+        if (strcmp(line, "print") == 0) {
+            int n = count < HISTORY_SIZE ? count : HISTORY_SIZE;
+            int start = count - n;
+
+            for (int i = start; i < count; i++) {
+                char *s = history[i % HISTORY_SIZE];
+                if (s != NULL) {
+                    printf("%s\n", s);
+                }
+            }
+        }
+    }
+
+    free(line);
+    free_history(history, HISTORY_SIZE);
+
+    return 0;
+}
+
